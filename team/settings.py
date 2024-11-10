@@ -167,3 +167,7 @@ EMAIL_HOST_USER = 'study1582@gmail.com'
 EMAIL_HOST_PASSWORD = 'jrri dizy qbnw vtrd'
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_MAIL = EMAIL_HOST_USER
+
+# 미디어 파일을 저장할 경로와 URL을 지정
+MEDIA_URL = '/media/'  # 클라이언트에서 사용할 URL 경로
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 서버의 실제 저장 경로

@@ -1,9 +1,10 @@
-from rest_framework import status
+from rest_framework import status, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from rest_framework.views    import APIView
 from django.contrib.auth import get_user_model, authenticate
-from .serializers import UserSerializer, UserLoginSerializer, EmailFindSerializer, PwEmailSerializer, PwChangeSerializer
+from .models import UserProfile
+from .serializers import UserSerializer, UserLoginSerializer, EmailFindSerializer, PwEmailSerializer, PwChangeSerializer, UserProfileSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -210,3 +211,11 @@ class PasswordChangeView(APIView):
                 return Response('인증에 실패하였습니다',status=status.HTTP_400_BAD_REQUEST)
             return Response('일치하는 유저가 없습니다',status=status.HTTP_400_BAD_REQUEST)           
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # 현재 로그인된 사용자에 해당하는 프로필만 반환
+        return UserProfile.objects.filter(user=self.request.user)

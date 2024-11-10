@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from .models import UserProfile
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import validate_email
@@ -122,3 +123,10 @@ class PwEmailSerializer(serializers.Serializer):
 #비밀번호 변경할 때 쓰는거
 class PwChangeSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField(max_length=None, use_url=True)
+    
+    class Meta:
+        model = UserProfile
+        fields = ['user', 'profile_picture', 'introduce', 'user__nickname'] 
