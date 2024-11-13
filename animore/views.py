@@ -219,3 +219,31 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # 현재 로그인된 사용자에 해당하는 프로필만 반환
         return UserProfile.objects.filter(user=self.request.user)
+
+class UserProfileSetupView(APIView): #회원가입 후 프로필 설정
+    def post(self, request):
+        user = request.user  # 로그인한 사용자의 정보 가져오기
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        profile_serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserProfileUpdateView(APIView): #프로필 수정
+    def patch(self, request):
+        user = request.user  # 로그인한 사용자의 정보 가져오기
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        profile_serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
+            return Response(profile_serializer.data, status=status.HTTP_200_OK)
+        return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
