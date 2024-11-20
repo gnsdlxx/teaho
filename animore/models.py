@@ -61,3 +61,17 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f'{self.user.email} Profile'
+
+class Review(models.Model):
+    profile = models.ImageField(upload_to='profile_images/', blank=True, null=True)  # 프로필 사진
+    name = models.CharField(max_length=100)  # 사용자 이름
+    title = models.CharField(max_length=100)  # 제목
+    content = models.TextField()  # 내용
+    image = models.ImageField(upload_to='post_images/', blank=True, null=True)  # 게시글 사진
+    dt_created = models.DateTimeField(auto_now_add=True)  # 생성 시간
+    dt_updated = models.DateTimeField(auto_now=True)  # 수정 시간
+
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.title} - {self.username}"

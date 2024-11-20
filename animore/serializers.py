@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile, Review
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import validate_email
@@ -126,7 +126,21 @@ class PwChangeSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     profile_picture = serializers.ImageField(max_length=None, use_url=True)
-    
+
     class Meta:
         model = UserProfile
         fields = ['user', 'profile_picture', 'introduce', 'user__nickname'] 
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'author', 'profile_image', 'username', 'title', 
+            'content', 'post_image', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['author', 'created_at', 'updated_at']  # 자동 설정 필드
+
+class ReviewCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['title', 'content', 'image']

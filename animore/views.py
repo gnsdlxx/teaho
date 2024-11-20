@@ -1,12 +1,16 @@
-from rest_framework import status, permissions, viewsets
+from rest_framework import status, permissions, viewsets, generics
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from rest_framework.views    import APIView
 from django.contrib.auth import get_user_model, authenticate
-from .models import UserProfile
-from .serializers import UserSerializer, UserLoginSerializer, EmailFindSerializer, PwEmailSerializer, PwChangeSerializer, UserProfileSerializer
+from .models import UserProfile, Review
+from .serializers import (
+    UserSerializer, UserLoginSerializer, EmailFindSerializer,
+    PwEmailSerializer, PwChangeSerializer, UserProfileSerializer,
+    ReviewSerializer, ReviewCreateUpdateSerializer
+)
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_str, force_bytes
 from django.conf import settings 
@@ -247,3 +251,28 @@ class UserProfileUpdateView(APIView): #프로필 수정
             profile_serializer.save()
             return Response(profile_serializer.data, status=status.HTTP_200_OK)
         return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ReviewListCreateView(generics.ListCreateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        # 요청한 유저 정보에서 author, username, profile_image를 설정
+        serializer.save(
+            author=self.request.user,
+            username=self.request.user.nickname,  # 사용자 모델의 필드에서 가져옴
+            profile_image=self.request.user.profile_image  # 사용자 프로필 사진
+        )
+
+class ReviewDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            return ReviewCreateUpdateSerializer
+        return ReviewSerializer
+
+    def perform_update(self, serializer):
+        serializer.save()
